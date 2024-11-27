@@ -7,8 +7,7 @@ WordPress is a popular content management system that helps you create and manag
 ## Getting Started
 
 Before we begin, you'll need:
-- A web hosting account with WordPress support
-- A domain name
+- A LAMP server with WordPress installed
 - Access to your WordPress admin dashboard
 
 ## Understanding Your WordPress Dashboard
