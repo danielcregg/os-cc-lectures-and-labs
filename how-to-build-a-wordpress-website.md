@@ -1,4 +1,4 @@
-# Building Your First WordPress Website: A Complete Beginner's Guide
+# Building Your First WordPress Website
 
 ## Introduction
 
