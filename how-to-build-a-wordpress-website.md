@@ -1,5 +1,37 @@
 # Building Your First WordPress Website
 
+## Table of Contents
+
+1. [Introduction](#introduction)
+2. [Getting Started](#getting-started)
+3. [Understanding Your WordPress Dashboard](#understanding-your-wordpress-dashboard)
+4. [Creating Your First Pages](#1-creating-your-first-pages)
+   - [Understanding Blocks](#understanding-blocks)
+   - [Important Page Elements](#important-page-elements)
+5. [Working with Media](#2-working-with-media)
+   - [Adding Images](#adding-images)
+   - [Image Best Practices](#image-best-practices)
+6. [Choosing and Customizing Your Theme](#3-choosing-and-customizing-your-theme)
+   - [Finding a Theme](#finding-a-theme)
+   - [Customizing Your Theme](#customizing-your-theme)
+7. [Essential Plugins](#4-essential-plugins)
+   - [Security Plugins](#security-plugins)
+   - [SEO Plugins](#seo-plugins)
+   - [Contact Form Plugins](#contact-form-plugins)
+8. [Creating an Effective Homepage](#5-creating-an-effective-homepage)
+   - [Essential Homepage Elements](#essential-homepage-elements)
+   - [Creating a Navigation Menu](#creating-a-navigation-menu)
+9. [Creating Custom Shortcodes](#6-creating-custom-shortcodes)
+   - [Understanding Shortcodes](#understanding-shortcodes)
+   - [Creating a More Complex Shortcode](#creating-a-more-complex-shortcode)
+   - [Shortcode Best Practices](#shortcode-best-practices)
+10. [Creating Custom Blocks](#7-creating-custom-blocks)
+    - [Your First Custom Block](#your-first-custom-block)
+    - [Understanding Custom Blocks](#understanding-custom-blocks)
+11. [Common Problems and Solutions](#common-problems-and-solutions)
+12. [Best Practices for Beginners](#best-practices-for-beginners)
+13. [Resources for Learning More](#resources-for-learning-more)
+
 ## Introduction
 
 WordPress is a popular content management system that helps you create and manage websites without needing advanced technical knowledge. This guide will walk you through creating your first WordPress website, explaining each step in detail.
@@ -137,27 +169,169 @@ Your homepage is often the first thing visitors see. Let's create an engaging on
 3. Add your important pages
 4. Set it as your "Primary Menu"
 
-## 6. Making Your Site Mobile-Friendly
+## 6. Creating Custom Shortcodes
 
-Most people will visit your site on phones and tablets. Here's how to make sure it works well for them:
+Shortcodes are like special commands that you can use in your pages or posts to add unique features. Let's explore how to create and use them effectively.
 
-### Mobile-Friendly Tips
-1. Preview your site on different devices
-2. Use the "Mobile Preview" button in the editor
-3. Make sure text is large enough to read
-4. Ensure buttons are big enough to tap
-5. Test your menu works on small screens
+### Understanding Shortcodes
 
-## 7. Basic SEO and Site Visibility
+Think of shortcodes as shortcuts that tell WordPress to do something special at a specific spot. For example, if you want to add the current year to your website automatically, you can create a simple shortcode:
 
-Help people find your website:
+```php
+// This code goes in your theme's functions.php file
+function display_current_year() {
+    // Get the current year
+    $year = date('Y');
+    // Return it (don't echo/print it!)
+    return $year;
+}
+// Tell WordPress about our new shortcode
+add_shortcode('current_year', 'display_current_year');
+```
 
-### Simple SEO Steps
-1. Write clear page titles
-2. Add descriptions to all pages
-3. Use headings properly (H1, H2, H3)
-4. Name images descriptively
-5. Create quality content regularly
+Now you can use `[current_year]` anywhere in your content, and WordPress will automatically insert the current year.
+
+### Creating a More Complex Shortcode
+
+Let's create a more useful shortcode that displays nicely formatted quotes. This example shows how to work with attributes (extra information we can pass to our shortcode):
+
+```php
+function custom_quote_shortcode($attributes, $content = null) {
+    // Set default values for our attributes
+    $args = shortcode_atts(array(
+        'author' => 'Unknown', // Default author if none provided
+        'color' => 'blue'      // Default color if none provided
+    ), $attributes);
+    
+    // Create the HTML for our quote
+    // The content parameter contains what's between the opening and closing shortcode
+    $html = '<div class="custom-quote" style="border-left: 4px solid ' . esc_attr($args['color']) . ';">';
+    $html .= '<p class="quote-text">' . esc_html($content) . '</p>';
+    $html .= '<p class="quote-author">- ' . esc_html($args['author']) . '</p>';
+    $html .= '</div>';
+    
+    return $html;
+}
+add_shortcode('quote', 'custom_quote_shortcode');
+```
+
+You can now create beautiful quotes in your content like this:
+```
+[quote author="Mark Twain" color="purple"]The secret of getting ahead is getting started.[/quote]
+```
+
+### Shortcode Best Practices
+
+When creating shortcodes, remember these important guidelines:
+1. Always return content, don't echo it
+2. Use `esc_html()` and `esc_attr()` to make your shortcodes secure
+3. Provide default values for all attributes
+4. Keep shortcodes focused on a single purpose
+5. Document how to use your shortcodes
+
+## 7. Creating Custom Blocks
+
+In modern WordPress, blocks are the preferred way to add special content to your pages. While shortcodes are simple commands, blocks provide a richer editing experience. Let's create a custom block together.
+
+### Your First Custom Block
+
+We'll create a "Highlighted Text" block that lets users add text with a colored background. Here's how:
+
+First, set up your development environment:
+
+```bash
+# In your theme or plugin directory
+npx @wordpress/create-block highlighted-text
+```
+
+Then, create your block's main code:
+
+```jsx
+import { registerBlockType } from '@wordpress/blocks';
+import { useBlockProps, RichText, ColorPicker } from '@wordpress/block-editor';
+import { Panel, PanelBody } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+
+registerBlockType('my-plugin/highlighted-text', {
+    // Tell WordPress about our block
+    title: __('Highlighted Text', 'my-plugin'),
+    icon: 'admin-customizer',
+    category: 'text',
+    
+    // What data we need to save
+    attributes: {
+        content: {
+            type: 'string',
+            source: 'html',
+            selector: 'p',
+        },
+        backgroundColor: {
+            type: 'string',
+            default: '#fff4cc'
+        }
+    },
+    
+    // What appears in the editor
+    edit: function(props) {
+        const { attributes, setAttributes } = props;
+        const blockProps = useBlockProps();
+        
+        return (
+            <div {...blockProps}>
+                {/* The text input */}
+                <RichText
+                    tagName="p"
+                    value={attributes.content}
+                    onChange={(content) => setAttributes({ content })}
+                    placeholder={__('Add highlighted text...', 'my-plugin')}
+                    style={{ backgroundColor: attributes.backgroundColor }}
+                />
+                
+                {/* Color picker in the sidebar */}
+                <Panel>
+                    <PanelBody title={__('Color Settings', 'my-plugin')}>
+                        <ColorPicker
+                            color={attributes.backgroundColor}
+                            onChangeComplete={(color) => 
+                                setAttributes({ backgroundColor: color.hex })
+                            }
+                        />
+                    </PanelBody>
+                </Panel>
+            </div>
+        );
+    },
+    
+    // How to save the content
+    save: function(props) {
+        const blockProps = useBlockProps.save();
+        return (
+            <div {...blockProps}>
+                <RichText.Content
+                    tagName="p"
+                    value={props.attributes.content}
+                    style={{ backgroundColor: props.attributes.backgroundColor }}
+                />
+            </div>
+        );
+    }
+});
+```
+
+### Understanding Custom Blocks
+
+A block consists of three main parts, each serving a specific purpose:
+
+1. Registration: This tells WordPress about your block - what it's called, what icon to use, and what category it belongs in.
+
+2. Edit Component: This defines what users see in the editor. Think of it as the interface where users input their content. In our example, it includes a text input area and a color picker.
+
+3. Save Component: This determines how the content is stored and displayed on the actual website. It takes the content from the editor and formats it for display.
+
+Think of it like building a form:
+- Registration is like creating the form fields and labels
+- Edit is like designing the form's appearance and interaction
+- Save is like processing the form submission and displaying the results
 
 ## Common Problems and Solutions
 
