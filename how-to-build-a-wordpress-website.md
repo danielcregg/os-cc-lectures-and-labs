@@ -136,11 +136,6 @@ Plugins add new features to your website. Here are some types of plugins you mig
 - Create automatic backups
 - Scan for problems
 
-### SEO Plugins
-- Help search engines find your content
-- Improve your search rankings
-- Guide you in writing better content
-
 ### Contact Form Plugins
 - Let visitors send you messages
 - Collect information from users
